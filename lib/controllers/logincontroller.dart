@@ -36,18 +36,18 @@ class LoginController extends GetxController {
     }
   }
 
-  // void verifyOTP() async {
-  //   if (otpController.text.isEmpty) {
-  //     pinError.value = "Field is required";
-  //   } else if (otpController.text.length < 6) {
-  //     pinError.value = "Invalid Pin";
-  //   } else {
-  //     isLoading.value = true;
-  //     await appFirebase.verifyOTP(otpController.text);
-  //     isLoading.value = false;
-  //     Get.off(const UserInfoScreen());
-  //   }
-  // }
+  void verifyOTP() async {
+    if (otpController.text.isEmpty) {
+      pinError.value = "Field is required";
+    } else if (otpController.text.length < 6) {
+      pinError.value = "Invalid Pin";
+    } else {
+      isLoading.value = true;
+      await appFirebase.verifyOTP(otpController.text);
+      isLoading.value = false;
+      // Get.off(const UserInfoScreen());
+    }
+  }
 
   // void getImage(ImageSource source) async {
   //   switch (source) {

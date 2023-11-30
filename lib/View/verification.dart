@@ -14,7 +14,7 @@ class Verification extends GetView<LoginController> {
   Widget build(BuildContext context) {
     return Obx(
       () => LoadingOverlay(
-        isLoading: false,
+        isLoading: controller.isLoading.value,
         progressIndicator:
             SpinKitRotatingPlain(color: Theme.of(context).primaryColor),
         child: Scaffold(
@@ -106,13 +106,16 @@ class Verification extends GetView<LoginController> {
                           padding: const EdgeInsets.only(
                               left: 24, right: 24, top: 40),
                           child: PinInputTextField(
+                            controller: controller.otpController,
                             pinLength: 6,
                             textInputAction: TextInputAction.done,
                             decoration: CirclePinDecoration(
                               strokeColorBuilder: FixedColorBuilder(
                                   Theme.of(context).primaryColor),
                               hintText: "345678",
-                              errorText: "error",
+                              errorText: controller.pinError.value.isEmpty
+                                  ? null
+                                  : controller.pinError.value,
                               strokeWidth: 2,
                               hintTextStyle: TextStyle(
                                 color: Theme.of(context).disabledColor,
@@ -143,7 +146,9 @@ class Verification extends GetView<LoginController> {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      controller.verifyOTP();
+                                    },
                                     borderRadius: BorderRadius.circular(30),
                                     child: const Center(
                                       child: Text(
