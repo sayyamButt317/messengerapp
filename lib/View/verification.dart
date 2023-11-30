@@ -76,7 +76,7 @@ class Verification extends StatelessWidget {
                     ),
                   ),
                 ),
-                 Expanded(
+                Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     child: Column(
@@ -85,46 +85,76 @@ class Verification extends StatelessWidget {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(30),
-                          child: AspectRatio(aspectRatio:2,
-                          child: Image.asset("phoneverification.png"),),
+                          child: AspectRatio(
+                            aspectRatio: 2,
+                            child: Image.asset("phoneverification.png"),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Text("Enter OTP that we sent to you",style:TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade600,
+                          child: Text(
+                            "Enter OTP that we sent to you",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding:const EdgeInsets.only(left:24,right:24,top:40),
-                        child:PinInputTextField(
-                        pinLength: 6,
-                        textInputAction: TextInputAction.done,
-                        decoration:CirclePinDecoration(
-                          strokeColorBuilder: FixedColorBuilder(
-                            Theme.of(context).primaryColor
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 24, right: 24, top: 40),
+                          child: PinInputTextField(
+                            pinLength: 6,
+                            textInputAction: TextInputAction.done,
+                            decoration: CirclePinDecoration(
+                              strokeColorBuilder: FixedColorBuilder(
+                                  Theme.of(context).primaryColor),
+                              hintText: "345678",
+                              errorText: "error",
+                              strokeWidth: 2,
+                              hintTextStyle: TextStyle(
+                                color: Theme.of(context).disabledColor,
+                                fontSize: 20,
+                              ),
+                            ),
                           ),
-                          hintText: "345678",
-                          errorText:"error",
-                          strokeWidth:2,
-                          hintTextStyle:TextStyle(color:Theme.of(context).disabledColor,
-                        fontSize:20,),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 24,
+                            right: 24,
+                            bottom: 30,
+                            top: 40,
+                          ),
+                          child: Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        offset: const Offset(4, 4),
+                                        blurRadius: 10,
+                                        color: Theme.of(context)
+                                            .disabledColor
+                                            .withOpacity(0.1)),
+                                  ]),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                    onTap: () {},
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: const Center(
+                                      child: Text(
+                                        "verify OTP",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    )),
+                              )),
                         ),
-                      ),
-                      Padding(padding:EdgeInsets.only(
-                        left:24,right:24,bottom:30,top:40,
-                      ),
-                      child:Container(
-                        height:48,
-                        decoration:BoxDecoration(
-                          boxRadius:BorderRadius.circular(30),
-                        boxShadow:[BoxShadow(offset:Offset(4,4),
-                      blurRadius:10,color:Themeof(context).disabledColor.withOpacity(0.1)
-                      ),]
-                        ),)
-                    ),
                       ],
                     ),
                   ),
