@@ -2,15 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
-
 import '../controllers/logincontroller.dart';
 import 'verification.dart';
 
-class NumberVerification extends StatelessWidget {
-  NumberVerification({Key? key}) : super(key: key);
+class NumberVerification extends GetView<LoginController> {
+  const NumberVerification({Key? key}) : super(key: key);
 
-  final LoginController controller =
-      Get.put<LoginController>(LoginController());
+  // final LoginController controller =
+  //     Get.put<LoginController>(LoginController());
 
   @override
   Widget build(BuildContext context) {

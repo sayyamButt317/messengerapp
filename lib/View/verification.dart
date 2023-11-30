@@ -5,7 +5,9 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
 
-class Verification extends StatelessWidget {
+import '../controllers/logincontroller.dart';
+
+class Verification extends GetView<LoginController> {
   const Verification({super.key});
 
   @override
