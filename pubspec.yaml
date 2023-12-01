@@ -41,6 +41,10 @@ flutter:
   assets:
     - images/phoneverfication.png
     - images/chat.png
+    - images/intro3.jpg
+    - images/intro2.jpg
+    - images/intro1.jpg
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

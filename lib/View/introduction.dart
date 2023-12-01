@@ -10,9 +10,9 @@ class IntroductionScreen extends StatelessWidget {
 
   PageController pageController = PageController(initialPage: 0);
   List<IntroModel> introPageList = ([
-    IntroModel("Number Verification", "", "images/phoneverfication.png"),
-    IntroModel("Find Frient Contact", "", "images/phoneverfication.png"),
-    IntroModel("Online Message", "", "images/phoneverfication.png"),
+    IntroModel("Number Verification", "", "images/intro3.jpg"),
+    IntroModel("Find Frient Contact", "", "images/intro2.jpg"),
+    IntroModel("Online Message", "", "images/intro1.jpg"),
     IntroModel("User Profile", "", "images/phoneverfication.png"),
   ]);
 
@@ -69,7 +69,7 @@ class IntroductionScreen extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                  onTap: () => Get.to(() => NumberVerification()),
+                  onTap: () => Get.to(() => const NumberVerification()),
                   borderRadius: BorderRadius.circular(24),
                   child: const Center(
                       child: Text("Register",
