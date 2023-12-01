@@ -25,6 +25,7 @@ dependencies:
   loading_overlay:
   flutter_spinkit:
   shared_preferences: ^2.2.2
+  lottie: ^2.7.0
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +45,9 @@ flutter:
     - images/intro3.jpg
     - images/intro2.jpg
     - images/intro1.jpg
+    - images/otpanimation.gif
+    - images/message.gif
+    - images/3dmessage.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

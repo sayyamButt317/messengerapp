@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:messenger/View/user_data.dart';
 import 'Bin/initial_binding.dart';
 import 'Routes/routes.dart';
 import 'View/splash.dart';
@@ -23,9 +24,10 @@ class MyApp extends StatelessWidget {
       theme: lightThemeData(context), */
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      initialBinding:InitialBinding(),
+      initialBinding: InitialBinding(),
       getPages: [
-        GetPage(name: Routes.splashscreen, page: () => const SplashScreen())
+        GetPage(name: Routes.splashscreen, page: () => const SplashScreen()),
+        GetPage(name: Routes.DATA, page: () => const UserData()),
       ],
       initialRoute: Routes.splashscreen,
     );

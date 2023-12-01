@@ -85,10 +85,11 @@ class Verification extends GetView<LoginController> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(30),
+                          padding: const EdgeInsets.all(5),
                           child: AspectRatio(
                             aspectRatio: 2,
-                            child: Image.asset("phoneverification.png"),
+                            child: Image.asset("images/otpanimation.gif",
+                                height: 200, width: 200),
                           ),
                         ),
                         Padding(

@@ -5,6 +5,7 @@ import '../widgets/intro_view.dart';
 import 'number.dart';
 import 'package:get/get.dart';
 
+// ignore: must_be_immutable
 class IntroductionScreen extends StatelessWidget {
   IntroductionScreen({super.key});
 

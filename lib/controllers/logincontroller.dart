@@ -3,6 +3,8 @@ import '../Network/appfirebase.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../View/user_data.dart';
+
 class LoginController extends GetxController {
   TextEditingController numberController = TextEditingController();
   TextEditingController otpController = TextEditingController();
@@ -45,7 +47,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       await appFirebase.verifyOTP(otpController.text);
       isLoading.value = false;
-      // Get.off(const UserInfoScreen());
+      Get.off(const UserData());
     }
   }
 

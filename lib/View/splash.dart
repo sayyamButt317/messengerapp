@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:messenger/Routes/routes.dart';
+import 'package:messenger/controllers/logincontroller.dart';
 
 import 'introduction.dart';
 
@@ -58,10 +61,15 @@ class _SplashScreenState extends State<SplashScreen>
       }
     });
     Future.delayed(const Duration(seconds: 4), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => IntroductionScreen()),
-      );
+      LoginController controller = Get.find<LoginController>();
+      if (controller.auth.currentUser != null) {
+        Get.offAllNamed(Routes.DATA);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => IntroductionScreen()),
+        );
+      }
     });
   }
 
@@ -80,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
                   return Transform.translate(
                     offset: Offset(-0.5 * animationController.value, 0.0),
                     child: Image.asset(
-                      "images/chat.png",
+                      "images/3dmessage.png",
                       width: 100,
                       height: 100,
                     ),
@@ -90,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
               SlideTransition(
                 position: textAnimation,
                 child: const Text(
-                  "Messenger",
+                  "WECHAT Messenger",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

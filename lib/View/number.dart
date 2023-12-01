@@ -3,13 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import '../controllers/logincontroller.dart';
-import 'verification.dart';
 
 class NumberVerification extends GetView<LoginController> {
   const NumberVerification({Key? key}) : super(key: key);
-
-  // final LoginController controller =
-  //     Get.put<LoginController>(LoginController());
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +219,7 @@ class NumberVerification extends GetView<LoginController> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              Get.to(() => const Verification());
+                              controller.sendOTP();
                             },
                             borderRadius: BorderRadius.circular(30),
                             child: const Center(
