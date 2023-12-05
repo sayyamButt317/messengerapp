@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 4), () {
       LoginController controller = Get.find<LoginController>();
       if (controller.auth.currentUser != null) {
-        Get.offAllNamed(Routes.DASHBOARD);
+        Get.offAllNamed(Routes.CHATUSER);
       } else {
         Navigator.push(
           context,

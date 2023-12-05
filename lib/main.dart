@@ -1,9 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:messenger/View/dashboard.dart';
+import 'package:messenger/View/chatuserscreen.dart';
 import 'Bin/initial_binding.dart';
 import 'Routes/routes.dart';
+import 'View/chat.dart';
 import 'View/splash.dart';
 
 void main() async {
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       initialBinding: InitialBinding(),
       getPages: [
         GetPage(name: Routes.splashscreen, page: () => const SplashScreen()),
-        GetPage(name: Routes.DASHBOARD, page: () => const DashboardDScreen()),
+        GetPage(name: Routes.CHATUSER, page: () => const ContactScreen()),
       ],
       initialRoute: Routes.splashscreen,
     );

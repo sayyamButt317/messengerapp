@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 
@@ -37,7 +38,7 @@ class AppFirebase {
   }
 
   Future<void> createUser(UserModel userModel) async {
-    CollectionReference ref = FirebaseFirestore.instance.collection("users");
+    CollectionReference ref = FirebaseFirestore.instance.collection("User");
     await FirebaseAuth.instance.currentUser?.updateDisplayName(userModel.name);
     await FirebaseAuth.instance.currentUser?.updatePhotoURL(userModel.image);
     SharedPreferences.getInstance().then((value) {
@@ -54,4 +55,5 @@ class AppFirebase {
     String link = await snapshot.ref.getDownloadURL();
     return link;
   }
+
 }

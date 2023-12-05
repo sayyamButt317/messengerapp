@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:messenger/View/verification.dart';
 import '../controllers/logincontroller.dart';
 
 class NumberVerification extends GetView<LoginController> {
@@ -219,7 +220,8 @@ class NumberVerification extends GetView<LoginController> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              controller.sendOTP();
+                              // controller.sendOTP();
+                              Get.to(const Verification());
                             },
                             borderRadius: BorderRadius.circular(30),
                             child: const Center(

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -83,7 +82,7 @@ class LoginController extends GetxController {
         typing: "false",
         online: DateTime.now().toString());
     appFirebase.createUser(userModel).then((value) => isLoading(false));
-    Get.offAllNamed(Routes.DASHBOARD);
+    Get.offAllNamed(Routes.CHATUSER);
   }
 
   void uploadUserData() async {
@@ -106,7 +105,7 @@ class LoginController extends GetxController {
           typing: "false",
           online: DateTime.now().toString());
       await appFirebase.createUser(userModel).then((value) => isLoading(false));
-      Get.offAllNamed(Routes.DASHBOARD);
+      Get.offAllNamed(Routes.CHATUSER);
     }
   }
 
@@ -149,7 +148,8 @@ class LoginController extends GetxController {
                         await openAppSettings();
                         break;
                       case PermissionStatus.provisional:
-                      // TODO: Handle this case.
+                        printError(info: "Provisional permission");
+                        break;
                     }
                   },
                 ),
@@ -184,7 +184,8 @@ class LoginController extends GetxController {
                         await openAppSettings();
                         break;
                       case PermissionStatus.provisional:
-                      // TODO: Handle this case.
+                        printError(info: "Provisional permission");
+                        break;
                     }
                   },
                 ),
