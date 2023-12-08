@@ -1,278 +1,313 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:loading_overlay/loading_overlay.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:messenger/View/chatuserscreen.dart';
 import 'package:messenger/controllers/logincontroller.dart';
+import 'package:path/path.dart' as Path;
 
-class UserInfoScreen extends GetView<LoginController> {
-  const UserInfoScreen({Key? key}) : super(key: key);
+import '../models/user_model.dart';
+
+class Profile extends StatefulWidget {
+  const Profile({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+
+  final LoginController getxcontroller =
+      Get.put<LoginController>(LoginController());
+
+  var myuser = UserModel(uId: '', image: '', name: '').obs;
+  RxString imageUrl = RxString('');
+  File? selectedImage;
+  Future<void> getImage(ImageSource camera) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      maxWidth: 150,
+      maxHeight: 200,
+      source: camera,
+    );
+    if (image != null) {
+      setState(() {
+        selectedImage = File(image.path);
+      });
+    }
+  }
+
+  Future<String> uploadImage(File? image) async {
+    if (image == null) {
+      return '';
+    }
+
+    String imageUrl = '';
+    try {
+      String fileName = Path.basename(image.path);
+      var reference = FirebaseStorage.instance.ref().child('Users/$fileName');
+      TaskSnapshot taskSnapshot = await reference.putFile(image);
+      imageUrl = await taskSnapshot.ref.getDownloadURL();
+      debugPrint("Download URL: $imageUrl");
+    } catch (error) {
+      debugPrint("Image Upload Error: $error");
+    }
+    return imageUrl;
+  }
+
+  Future<void> storeUserInfo() async {
+    try {
+      String imageurl = '';
+
+      if (selectedImage != null) {
+        imageurl = await uploadImage(selectedImage!);
+      }
+
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+
+      // Update user data with image URL if it's not empty
+      if (imageurl.isNotEmpty) {
+        await FirebaseFirestore.instance.collection('User').doc(uid).set({
+          'image': imageurl,
+        }, SetOptions(merge: true));
+      }
+
+      // Update user data with name and phone
+      await FirebaseFirestore.instance.collection('User').doc(uid).set({
+        'name': nameController.text,
+      }, SetOptions(merge: true));
+
+      getxcontroller.isprofileloading(true);
+      Get.offAll(() => const ContactScreen());
+    } catch (error) {
+      Get.snackbar(
+        'Error',
+        "There was an error updating your profile.",
+        backgroundColor: Colors.transparent,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        colorText: Colors.red,
+        borderWidth: 1,
+        borderColor: Colors.red,
+      );
+    }
+  }
+
+  Future<void> getuserinfo() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance
+        .collection('User')
+        .doc(uid)
+        .snapshots()
+        .listen((event) {
+      myuser.value = UserModel.fromJson(event.data() ?? {});
+      imageUrl.value = myuser.value.image ?? '';
+      nameController.text = myuser.value.name ?? '';
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Get.put(LoginController());
-
-    return Obx(
-      () => LoadingOverlay(
-        isLoading: controller.isLoading.value,
-        progressIndicator:
-            SpinKitRotatingPlain(color: Theme.of(context).primaryColor),
-        child: Scaffold(
-          body: InkWell(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top,
-                  ),
-                  child: Container(
-                    height: AppBar().preferredSize.height,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              Theme.of(context).disabledColor.withOpacity(0.1),
-                          offset: const Offset(4, 4),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: SizedBox(
-                            height: AppBar().preferredSize.height - 8,
-                            width: AppBar().preferredSize.width - 8,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(32),
-                                onTap: () => Get.back(),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Icon(
-                                    Icons.arrow_back_ios_new,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const Expanded(
-                          child: Text("User Information",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              )),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const Text("Skip"),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 24,
-                            right: 24,
-                            top: 40,
-                          ),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Container(
-                                      height: 50,
-                                      width: 50,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0.5,
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
+        title: const Text(
+          'Profile',
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: 300,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Center(),
+                  SizedBox(
+                    height: Get.height * 0.2,
+                    child: Obx(() {
+                      return Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: GestureDetector(
+                              onTap: () {
+                                getImage(ImageSource.camera);
+                              },
+                              child: selectedImage == null
+                                  ? (myuser.value.image != null &&
+                                          myuser.value.image!.isNotEmpty)
+                                      ? Container(
+                                          width: 120,
+                                          height: 120,
+                                          margin:
+                                              const EdgeInsets.only(bottom: 20),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.grey,
+                                              width: 5,
+                                            ),
+                                            image: DecorationImage(
+                                              fit: BoxFit.fill,
+                                              image: NetworkImage(
+                                                  myuser.value.image!),
+                                            ),
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
+                                          ),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.camera_alt_outlined,
+                                              size: 40,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        )
+                                      : Container(
+                                          width: 120,
+                                          height: 120,
+                                          margin:
+                                              const EdgeInsets.only(bottom: 20),
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
+                                          ),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.camera_alt_outlined,
+                                              size: 40,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        )
+                                  : Container(
+                                      width: 120,
+                                      height: 120,
+                                      margin: const EdgeInsets.only(bottom: 20),
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor,
+                                        image: DecorationImage(
+                                          image: FileImage(selectedImage!),
+                                          fit: BoxFit.fill,
+                                        ),
                                         shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Theme.of(context)
-                                                .disabledColor
-                                                .withOpacity(0.1),
-                                            blurRadius: 8,
-                                            offset: const Offset(4, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(60),
-                                        child:
-                                            controller.selectedImage.value == ""
-                                                ? Image.asset("images/chat.png")
-                                                : Image.file(File(controller
-                                                    .selectedImage.value)),
+                                        color: Colors.grey,
                                       ),
                                     ),
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).primaryColor,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Theme.of(context)
-                                                  .disabledColor
-                                                  .withOpacity(0.1),
-                                              blurRadius: 8,
-                                              offset: const Offset(4, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            borderRadius:
-                                                BorderRadius.circular(32),
-                                            onTap: () {
-                                              controller.showPicker(context);
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(5),
-                                              child: Icon(
-                                                Icons.camera_alt,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .background,
-                                                size: 18,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Theme.of(context)
-                                            .disabledColor
-                                            .withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(4, 4),
-                                      ),
-                                    ],
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .background,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 15, right: 15),
-                                    child: SizedBox(
-                                      height: 48,
-                                      child: Center(
-                                        child: TextField(
-                                          controller: controller.nameController,
-                                          textCapitalization:
-                                              TextCapitalization.sentences,
-                                          cursorColor:
-                                              Theme.of(context).primaryColor,
-                                          maxLines: 1,
-                                          decoration: InputDecoration(
-                                            errorMaxLines: 1,
-                                            contentPadding:
-                                                const EdgeInsets.only(
-                                              top: 5,
-                                              bottom: 5,
-                                            ),
-                                            errorText:
-                                                controller.nameError.value == ""
-                                                    ? null
-                                                    : controller
-                                                        .nameError.value,
-                                            border: InputBorder.none,
-                                            hintText: "Username",
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                            ),
+                          )
+                        ],
+                      );
+                    }),
+                  ),
+                  Container(
+                    height: Get.height * 0.1,
+                  ),
+                  TextFormField(
+                    controller: nameController,
+                    cursorColor: Colors.black,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: "Name",
+                      hintText: "Name",
+                      hintStyle: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                      labelStyle: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.person,
+                        color: Colors.black,
+                        size: 18,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.grey,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.black,
+                          width: 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: Get.height * 0.2,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        MaterialButton(
+                          onPressed: () async {
+                            if (nameController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please fill all required fields',
                                   ),
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 24,
-                                  right: 24,
-                                  bottom: 30,
-                                  top: 40,
-                                ),
-                                child: Container(
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Theme.of(context)
-                                            .disabledColor
-                                            .withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(4, 4),
-                                      ),
-                                    ],
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  child: Material(
-                                    child: InkWell(
-                                      onTap: () {
-                                        controller.uploadUserData();
-                                      },
-                                      borderRadius: BorderRadius.circular(30),
-                                      child: const Center(
-                                        child: Text(
-                                          "Submit",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                              );
+                            } else {
+                              getxcontroller.isprofileloading(true);
+                              await storeUserInfo();
+                              getxcontroller.isprofileloading(false);
+                            }
+                          },
+                          height: 50,
+                          minWidth: 300,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
+                          color: Theme.of(context).primaryColor,
+                          child: Obx(() {
+                            return getxcontroller.isprofileloading.value
+                                ? const CircularProgressIndicator(
+                                    strokeWidth: 3, color: Colors.white)
+                                : const Text(
+                                    "Save",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  );
+                          }),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

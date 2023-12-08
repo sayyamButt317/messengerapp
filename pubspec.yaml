@@ -29,6 +29,7 @@ dependencies:
   image_picker: ^1.0.4
   curved_navigation_bar: ^1.0.3
   firebase_database: ^10.3.6
+  speech_to_text: ^6.4.1
   
 dev_dependencies:
   flutter_test:
@@ -44,12 +45,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - images/phoneverfication.png
-    - images/chat.png
     - images/intro3.jpg
     - images/intro2.jpg
     - images/intro1.jpg
     - images/otpanimation.gif
-    - images/message.gif
     - images/3dmessage.png
 
 

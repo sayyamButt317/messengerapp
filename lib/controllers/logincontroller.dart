@@ -9,23 +9,31 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../Routes/routes.dart';
 import '../View/user_data.dart';
 import '../app/app_permission.dart';
-import '../app/imagepicker.dart';
 import '../models/user_model.dart';
 
 class LoginController extends GetxController {
   TextEditingController numberController = TextEditingController();
   TextEditingController otpController = TextEditingController();
   TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   String code = "+92";
   RxString numberError = RxString("");
   RxString nameError = RxString("");
   RxString pinError = RxString("");
+  RxString selectedimage = "".obs;
   FirebaseAuth auth = FirebaseAuth.instance;
   AppFirebase appFirebase = AppFirebase();
   late String number;
   RxBool isLoading = RxBool(false);
-  var selectedImage = "".obs;
+  RxString selectedImage = "".obs;
   AppPermission appPermission = AppPermission();
+  var isprofileloading = false.obs;
+  RxString imageUrl = RxString('');
+
+  void setIsProfileLoading(bool isLoading) {
+    isprofileloading.value = isLoading;
+  }
+
   @override
   void onClose() {
     super.onClose();
@@ -58,52 +66,47 @@ class LoginController extends GetxController {
     }
   }
 
-  void getImage(ImageSource source) async {
-    switch (source) {
-      case ImageSource.camera:
-        File file = await imageFromCamera(true);
-        selectedImage.value = file.path;
-        break;
-      case ImageSource.gallery:
-        File file = await imageFromGallery(true);
-        selectedImage.value = file.path;
-        break;
+  getImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      selectedImage.value = image.path.toString();
     }
   }
 
   void skipInfo() {
     isLoading.value = true;
     var userModel = UserModel(
-        uId: auth.currentUser!.uid,
-        name: "",
-        image: "",
-        number: number,
-        status: "Hey i'm using this app",
-        typing: "false",
-        online: DateTime.now().toString());
+      uId: auth.currentUser!.uid,
+      name: "",
+      image: "",
+    );
     appFirebase.createUser(userModel).then((value) => isLoading(false));
     Get.offAllNamed(Routes.CHATUSER);
   }
 
-  void uploadUserData() async {
+  uploadUserData() async {
     if (nameController.text.isEmpty) {
-      nameError("Field is required");
+      Get.snackbar("Error", "Name Field is required",
+          snackPosition: SnackPosition.BOTTOM, colorText: Colors.red);
     } else if (selectedImage.value == "") {
-      printError(info: "Image is required");
+      Get.snackbar(
+        "Error",
+        "Image is required",
+        snackPosition: SnackPosition.BOTTOM,
+        colorText: Colors.red,
+      );
     } else {
-      nameError.value = "";
       isLoading.value = true;
       String link = await appFirebase.uploadUserImage(
           "profile/image", auth.currentUser!.uid, File(selectedImage.value));
 
       var userModel = UserModel(
-          uId: auth.currentUser!.uid,
-          name: nameController.text,
-          image: link,
-          number: number,
-          status: "Hey I'm using this app",
-          typing: "false",
-          online: DateTime.now().toString());
+        uId: auth.currentUser!.uid,
+        name: nameController.text,
+        image: link,
+      );
       await appFirebase.createUser(userModel).then((value) => isLoading(false));
       Get.offAllNamed(Routes.CHATUSER);
     }

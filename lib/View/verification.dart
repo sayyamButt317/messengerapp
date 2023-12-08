@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:loading_overlay/loading_overlay.dart';
-import 'package:messenger/View/chatuserscreen.dart';
+import 'package:messenger/View/user_info.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
 
 import '../controllers/logincontroller.dart';
@@ -145,11 +145,11 @@ class Verification extends GetView<LoginController> {
                                             .withOpacity(0.1)),
                                   ]),
                               child: Material(
-                                color: Colors.transparent,
+                                color: Theme.of(context).primaryColor,
                                 child: InkWell(
                                     onTap: () {
                                       // controller.verifyOTP();
-                                      Get.to(const ContactScreen());
+                                      Get.to(Profile());
                                     },
                                     borderRadius: BorderRadius.circular(30),
                                     child: const Center(

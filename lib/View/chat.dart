@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen(
+      {Key? key,
+      required String userId,
+      required String userName,
+      required userImage})
+      : super(key: key);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
