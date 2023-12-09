@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../View/verification.dart';
@@ -18,7 +20,16 @@ class AppFirebase {
         verificationCompleted: ((phoneAuthCredential) =>
             printInfo(info: "user verified")),
         verificationFailed: (FirebaseAuthException e) =>
-            printError(info: e.message!),
+            Get.snackbar(
+              'Error',
+               e.message!,
+              backgroundColor: Colors.transparent,
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(16),
+              colorText: Colors.red,
+              borderWidth: 1,
+              borderColor: Colors.red,
+            ),
         codeSent: (String verificationId, int? resendToken) async {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString("code", verificationId);
