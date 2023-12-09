@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter_tts/flutter_tts.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen(
-      {Key? key,
-      required String userId,
-      required String userName,
-      required userImage})
-      : super(key: key);
+  const ChatScreen({
+    Key? key,
+    required this.userId,
+    required this.userName,
+    required this.userImage,
+  }) : super(key: key);
+
+  final String userId;
+  final String userName;
+  final userImage;
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -16,12 +21,20 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late ScrollController _scrollController;
+  // FlutterTts flutterTts = FlutterTts();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat with User"),
+        title: Text(widget.userName),
         actions: [
           IconButton(
             icon: const Icon(Icons.search_rounded, color: Colors.black),
@@ -52,6 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
 
                 return ListView(
+                  controller: _scrollController,
                   reverse: true,
                   children: messageWidgets,
                 );
@@ -91,6 +105,15 @@ class _ChatScreenState extends State<ChatScreen> {
               _sendMessage();
             },
           ),
+          IconButton(
+            icon: const Icon(
+              Icons.mic,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              _speakMessage();
+            },
+          ),
         ],
       ),
     );
@@ -100,19 +123,31 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_messageController.text.isNotEmpty) {
       _firestore.collection('messages').add({
         'text': _messageController.text,
-        'sender': 'User', // replace with the actual sender
+        'sender': 'User',
       });
 
       _messageController.clear();
+      _scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
+  }
+
+  Future<void> _speakMessage() async {
+    // if (_messageController.text.isNotEmpty) {
+    //   await flutterTts.speak(_messageController.text);
+    // }
   }
 }
 
 class MessageWidget extends StatelessWidget {
   final String sender;
   final String text;
+  // final FlutterTts flutterTts = FlutterTts();
 
-  const MessageWidget(this.sender, this.text, {super.key});
+  MessageWidget(this.sender, this.text, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -121,20 +156,45 @@ class MessageWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            sender,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Text(
+                sender,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              IconButton(
+                icon: const Icon(
+                  Icons.volume_up,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  _speakText();
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 4.0),
-          Text(
-            text,
-            style: const TextStyle(color: Colors.white),
+          Container(
+            padding: const EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              color: sender == 'User' ? Colors.blue : Colors.grey[700],
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _speakText() async {
+    // await flutterTts.speak(text);
   }
 }

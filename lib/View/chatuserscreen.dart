@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'chat.dart';
 
@@ -13,14 +14,18 @@ class ContactScreen extends StatefulWidget {
 class _ContactScreenState extends State<ContactScreen> {
   @override
   Widget build(BuildContext context) {
-    CollectionReference users = FirebaseFirestore.instance.collection('User');
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          'Contacts',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: users.snapshots(),
+        stream: firestore.collection('User').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -30,69 +35,39 @@ class _ContactScreenState extends State<ContactScreen> {
             return Text('Error: ${snapshot.error}');
           }
 
+          final List<DocumentSnapshot> contacts = snapshot.data?.docs ?? [];
+
           return ListView.builder(
-            itemCount: snapshot.data?.docs.length ?? 0,
+            itemCount: contacts.length,
             itemBuilder: (context, index) {
-              var user = snapshot.data?.docs[index];
-              if (user != null) {
-                return Card(
-                  child: ListTile(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            userId: user.id,
-                            userName: user['name'],
-                            userImage: user['image'],
-                          ),
-                        ),
-                      );
-                    },
-                    leading: Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                      child: user['image'].toString().isEmpty
-                          ? const Icon(Icons.person_outlined)
-                          : ClipRRect(
-                              borderRadius: BorderRadius.circular(50),
-                              child: Image(
-                                fit: BoxFit.fill,
-                                image: NetworkImage(user['image']),
-                              ),
-                            ),
-                    ),
-                    title: Text(user['name'].toString()),
-                    subtitle: Text(user['message'].toString()),
-                  ),
-                );
-              } else {
-                return Container();
-              }
+              final contact = contacts[index].data() as Map<String, dynamic>;
+              final String name = contact['name'] ?? '';
+              final String image = contact['image'] ?? '';
+
+              return ListTile(
+                onTap: () {
+                  Get.to(ChatScreen(
+                    userId: contacts[index].id,
+                    userName: name,
+                    userImage: image,
+                  ));
+                },
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(image),
+                ),
+                title: Text(name),
+                subtitle:
+                    const Text('Last message'), // Add last message logic here
+              );
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ChatScreen(
-                userId: '',
-                userName: '',
-                userImage: "",
-              ),
-            ),
-          );
+          Get.to(const ChatScreen(userId: "", userName: "", userImage: ""));
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.messenger_rounded),
       ),
     );
   }

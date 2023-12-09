@@ -95,12 +95,13 @@ class _SplashScreenState extends State<SplashScreen>
                   );
                 },
               ),
+              const SizedBox(width: 8), // Adjust the width as needed
               SlideTransition(
                 position: textAnimation,
                 child: const Text(
-                  "WECHAT Messenger",
+                  "Go Blind",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),

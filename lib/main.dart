@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:messenger/View/chatuserscreen.dart';
 import 'Bin/initial_binding.dart';
 import 'Routes/routes.dart';
-import 'View/chat.dart';
 import 'View/splash.dart';
 
 void main() async {

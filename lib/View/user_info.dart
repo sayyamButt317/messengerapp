@@ -65,25 +65,27 @@ class _ProfileState extends State<Profile> {
 
   Future<void> storeUserInfo() async {
     try {
-      String imageurl = '';
-
-      if (selectedImage != null) {
-        imageurl = await uploadImage(selectedImage!);
-      }
+      String imageurl = await uploadImage(selectedImage);
 
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
       // Update user data with image URL if it's not empty
       if (imageurl.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('User').doc(uid).set({
-          'image': imageurl,
-        }, SetOptions(merge: true));
+        await FirebaseFirestore.instance.collection('User').doc(uid).set(
+          {
+            'image': imageurl,
+          },
+          SetOptions(merge: true),
+        );
       }
 
-      // Update user data with name and phone
-      await FirebaseFirestore.instance.collection('User').doc(uid).set({
-        'name': nameController.text,
-      }, SetOptions(merge: true));
+      // Update user data with name
+      await FirebaseFirestore.instance.collection('User').doc(uid).set(
+        {
+          'name': nameController.text,
+        },
+        SetOptions(merge: true),
+      );
 
       getxcontroller.isprofileloading(true);
       Get.offAll(() => const ContactScreen());
@@ -109,27 +111,29 @@ class _ProfileState extends State<Profile> {
         .snapshots()
         .listen((event) {
       myuser.value = UserModel.fromJson(event.data() ?? {});
-      imageUrl.value = myuser.value.image ?? '';
-      nameController.text = myuser.value.name ?? '';
+      imageUrl.value = myuser.value.image;
+      nameController.text = myuser.value.name;
     });
   }
 
   @override
   void initState() {
     super.initState();
+    getuserinfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 0.5,
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
         title: const Text(
           'Profile',
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -155,8 +159,7 @@ class _ProfileState extends State<Profile> {
                                 getImage(ImageSource.camera);
                               },
                               child: selectedImage == null
-                                  ? (myuser.value.image != null &&
-                                          myuser.value.image!.isNotEmpty)
+                                  ? (myuser.value.image.isNotEmpty)
                                       ? Container(
                                           width: 120,
                                           height: 120,
@@ -170,7 +173,7 @@ class _ProfileState extends State<Profile> {
                                             image: DecorationImage(
                                               fit: BoxFit.fill,
                                               image: NetworkImage(
-                                                  myuser.value.image!),
+                                                  myuser.value.image),
                                             ),
                                             shape: BoxShape.circle,
                                             color: Colors.grey,
@@ -279,8 +282,9 @@ class _ProfileState extends State<Profile> {
                               );
                             } else {
                               getxcontroller.isprofileloading(true);
-                              await storeUserInfo();
-                              getxcontroller.isprofileloading(false);
+                              // await storeUserInfo();
+                              // getxcontroller.isprofileloading(false);
+                              Get.to(const ContactScreen());
                             }
                           },
                           height: 50,

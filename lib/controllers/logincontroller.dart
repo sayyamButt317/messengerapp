@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:messenger/View/user_info.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../Network/appfirebase.dart';
 import 'package:get/get.dart';
@@ -62,7 +63,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       await appFirebase.verifyOTP(otpController.text);
       isLoading.value = false;
-      Get.off(const UserData());
+      Get.off(const Profile());
     }
   }
 
