@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../Routes/routes.dart';
-import '../View/user_data.dart';
+
 import '../app/app_permission.dart';
 import '../models/user_model.dart';
 

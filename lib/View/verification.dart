@@ -148,8 +148,8 @@ class Verification extends GetView<LoginController> {
                                 color: Theme.of(context).primaryColor,
                                 child: InkWell(
                                     onTap: () {
-                                      controller.verifyOTP();
-                                      // Get.to(const ContactScreen());
+                                      // controller.verifyOTP();
+                                      Get.to(const ContactScreen());
                                     },
                                     borderRadius: BorderRadius.circular(30),
                                     child: const Center(

@@ -31,7 +31,7 @@ dependencies:
   firebase_database: ^10.3.6
   speech_to_text: ^6.4.1
   audioplayers: 
-  # flutter_tts:
+  flutter_tts:
   
 dev_dependencies:
   flutter_test:

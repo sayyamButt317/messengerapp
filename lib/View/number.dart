@@ -220,8 +220,8 @@ class NumberVerification extends GetView<LoginController> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              controller.sendOTP();
-                              // Get.to(const Verification());
+                              // controller.sendOTP();
+                              Get.to(const Verification());
                             },
                             borderRadius: BorderRadius.circular(30),
                             child: const Center(

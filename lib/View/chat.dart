@@ -1,6 +1,7 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -22,12 +23,20 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late ScrollController _scrollController;
-  // FlutterTts flutterTts = FlutterTts();
+  FlutterTts flutterTts = FlutterTts();
+  AudioPlayer _audioPlayer = AudioPlayer();
+
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -60,7 +69,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   var messageText = message['text'];
                   var messageSender = message['sender'];
 
-                  var messageWidget = MessageWidget(messageSender, messageText);
+                  var messageWidget = MessageWidget(
+                    sender: messageSender,
+                    text: messageText,
+                    onDelete: () {
+                      _deleteMessage(message.id);
+                    },
+                  );
                   messageWidgets.add(messageWidget);
                 }
 
@@ -136,18 +151,28 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _speakMessage() async {
-    // if (_messageController.text.isNotEmpty) {
-    //   await flutterTts.speak(_messageController.text);
-    // }
+    if (_messageController.text.isNotEmpty) {
+      await flutterTts.speak(_messageController.text);
+    }
+  }
+
+  void _deleteMessage(String messageId) {
+    _firestore.collection('messages').doc(messageId).delete();
   }
 }
 
 class MessageWidget extends StatelessWidget {
   final String sender;
   final String text;
-  // final FlutterTts flutterTts = FlutterTts();
+  final FlutterTts flutterTts = FlutterTts();
+  final Function onDelete;
 
-  MessageWidget(this.sender, this.text, {Key? key}) : super(key: key);
+  MessageWidget({
+    required this.sender,
+    required this.text,
+    required this.onDelete,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -161,20 +186,11 @@ class MessageWidget extends StatelessWidget {
               Text(
                 sender,
                 style: const TextStyle(
-                  color: Colors.grey,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(width: 8.0),
-              IconButton(
-                icon: const Icon(
-                  Icons.volume_up,
-                  color: Colors.grey,
-                ),
-                onPressed: () {
-                  _speakText();
-                },
-              ),
             ],
           ),
           const SizedBox(height: 4.0),
@@ -184,9 +200,47 @@ class MessageWidget extends StatelessWidget {
               color: sender == 'User' ? Colors.blue : Colors.grey[700],
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: Text(
-              text,
-              style: const TextStyle(color: Colors.white),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    text,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.volume_up,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    _speakText();
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.textsms_rounded,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    // Add logic for handling text message button tap
+                  },
+                ),
+                GestureDetector(
+                  onTap: () {
+                    onDelete();
+                  },
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      // Add logic for handling delete button tap
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -195,6 +249,6 @@ class MessageWidget extends StatelessWidget {
   }
 
   Future<void> _speakText() async {
-    // await flutterTts.speak(text);
+    await flutterTts.speak(text);
   }
 }

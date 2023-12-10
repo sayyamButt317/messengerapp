@@ -17,58 +17,58 @@ class _ContactScreenState extends State<ContactScreen> {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          'Contacts',
-          style: TextStyle(color: Colors.white),
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
+          title: const Text(
+            'Contacts',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: firestore.collection('User').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        body: StreamBuilder<QuerySnapshot>(
+          stream: firestore.collection('User').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
 
-          final List<DocumentSnapshot> contacts = snapshot.data?.docs ?? [];
+            final List<DocumentSnapshot> contacts = snapshot.data?.docs ?? [];
 
-          return ListView.builder(
-            itemCount: contacts.length,
-            itemBuilder: (context, index) {
-              final contact = contacts[index].data() as Map<String, dynamic>;
-              final String name = contact['name'] ?? '';
-              final String image = contact['image'] ?? '';
+            return ListView.builder(
+              itemCount: contacts.length,
+              itemBuilder: (context, index) {
+                final contact = contacts[index].data() as Map<String, dynamic>;
+                final String name = contact['name'] ?? '';
+                final String image = contact['image'] ?? '';
 
-              return ListTile(
-                onTap: () {
-                  Get.to(ChatScreen(
-                    userId: contacts[index].id,
-                    userName: name,
-                    userImage: image,
-                  ));
-                },
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(image),
-                ),
-                title: Text(name),
-                subtitle:
-                    const Text('Last message'), // Add last message logic here
-              );
+                return ListTile(
+                  onTap: () {
+                    Get.to(ChatScreen(
+                      userId: contacts[index].id,
+                      userName: name,
+                      userImage: image,
+                    ));
+                  },
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(image),
+                  ),
+                  title: Text(name),
+                  subtitle:
+                  const Text('Last message'), // Add last message logic here
+                );
+              },
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Get.to(const ChatScreen(userId: "", userName: "", userImage: ""));
             },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.to(const ChatScreen(userId: "", userName: "", userImage: ""));
-        },
-        child: const Icon(Icons.messenger_rounded),
-      ),
-    );
-  }
+            child: const Icon(Icons.messenger_rounded),
+         ),
+      );
+   }
 }
