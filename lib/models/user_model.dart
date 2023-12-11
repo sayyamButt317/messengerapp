@@ -10,18 +10,18 @@ class UserModel {
   UserModel({
     required this.uId,
     required this.name,
-    required this.image,
+
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         uId: json["uId"],
         name: json["name"],
-        image: json["image"],
+
       );
 
   Map<String, dynamic> toJson() => {
         "uId": uId,
         "name": name,
-        "image": image,
+
       };
 }

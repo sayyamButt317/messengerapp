@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../Routes/routes.dart';
 
+import '../View/chatuserscreen.dart';
 import '../View/verification.dart';
 import '../app/app_permission.dart';
 import '../models/user_model.dart';
@@ -89,7 +90,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       await appFirebase.verifyOTP(otpController.text);
       isLoading.value = false;
-      Get.off(const Profile());
+      Get.off(const ContactScreen());
     }
   }
 
@@ -107,7 +108,7 @@ class LoginController extends GetxController {
     var userModel = UserModel(
       uId: auth.currentUser!.uid,
       name: "",
-      image: "",
+
     );
     appFirebase.createUser(userModel).then((value) => isLoading(false));
     Get.offAllNamed(Routes.CHATUSER);
@@ -126,13 +127,12 @@ class LoginController extends GetxController {
       );
     } else {
       isLoading.value = true;
-      String link = await appFirebase.uploadUserImage(
-          "profile/image", auth.currentUser!.uid, File(selectedImage.value));
+
 
       var userModel = UserModel(
         uId: auth.currentUser!.uid,
         name: nameController.text,
-        image: link,
+
       );
       await appFirebase.createUser(userModel).then((value) => isLoading(false));
       Get.offAllNamed(Routes.CHATUSER);

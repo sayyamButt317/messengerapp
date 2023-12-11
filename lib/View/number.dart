@@ -1,15 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:messenger/View/verification.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import '../controllers/logincontroller.dart';
 
 class NumberVerification extends GetView<LoginController> {
- const NumberVerification({Key? key}) : super(key: key);
-
+  const NumberVerification({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -219,28 +218,40 @@ class NumberVerification extends GetView<LoginController> {
                             ),
                           ],
                         ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-controller.isLoading(true);
-                              controller.sendOTP();
-                              controller.isLoading(false);
+                        child: Stack(
+                          children: [
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  controller.sendOTP();
 
-                            },
-                            borderRadius: BorderRadius.circular(30),
-                            child: const Center(
-                              child: Text(
-                                "Generate OTP",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
+                                },
+                                borderRadius: BorderRadius.circular(30),
+                                child: const Center(
+                                  child: Text(
+                                    "Generate OTP",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                            if (controller.isLoading.value) // Assuming controller.isLoading is a boolean indicating loading state
+                              Positioned.fill(
+                                child: Container(
+                                  color: Colors.black.withOpacity(0.5),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
+
                       ),
                     ),
                   ],
@@ -252,6 +263,4 @@ controller.isLoading(true);
       ),
     );
   }
-
-
 }

@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:messenger/View/chatuserscreen.dart';
 import 'package:messenger/controllers/logincontroller.dart';
-import 'package:path/path.dart' as Path;
 
 import '../models/user_model.dart';
 
@@ -28,18 +26,12 @@ class _ProfileState extends State<Profile> {
   final LoginController getxcontroller =
       Get.put<LoginController>(LoginController());
 
-  var myuser = UserModel(uId: '', image: '', name: '').obs;
-
-
-
+  var myuser = UserModel(uId: '', name: '').obs;
 
   Future<void> storeUserInfo() async {
     try {
-
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
-
-      // Update user data with name
       await FirebaseFirestore.instance.collection('User').doc(uid).set(
         {
           'name': nameController.text,
@@ -63,22 +55,10 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  Future<void> getuserinfo() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    FirebaseFirestore.instance
-        .collection('User')
-        .doc(uid)
-        .snapshots()
-        .listen((event) {
-      myuser.value = UserModel.fromJson(event.data() ?? {});
-      nameController.text = myuser.value.name;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    getuserinfo();
+
   }
 
   @override
@@ -108,7 +88,6 @@ class _ProfileState extends State<Profile> {
                   const Center(),
                   SizedBox(
                     height: Get.height * 0.2,
-
                   ),
                   Container(
                     height: Get.height * 0.1,
@@ -170,9 +149,8 @@ class _ProfileState extends State<Profile> {
                               );
                             } else {
                               getxcontroller.isprofileloading(true);
-                              // await storeUserInfo();
-                              // getxcontroller.isprofileloading(false);
-                              Get.to(const ContactScreen());
+                              await getxcontroller.uploadUserData();
+                              getxcontroller.isprofileloading(false);
                             }
                           },
                           height: 50,
