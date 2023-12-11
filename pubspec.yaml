@@ -30,8 +30,9 @@ dependencies:
   curved_navigation_bar: ^1.0.3
   firebase_database: ^10.3.6
   speech_to_text: ^6.4.1
-  audioplayers: 
+  audioplayers: ^5.2.1
   flutter_tts:
+  record: ^5.0.1
   
 dev_dependencies:
   flutter_test:

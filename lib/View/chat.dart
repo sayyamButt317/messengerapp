@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -16,7 +17,7 @@ class ChatScreen extends StatefulWidget {
   final userImage;
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -24,18 +25,25 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late ScrollController _scrollController;
   FlutterTts flutterTts = FlutterTts();
-  AudioPlayer _audioPlayer = AudioPlayer();
-
+  late AudioPlayer audioPlayer;
+  late Record audioRecord;
+  bool isRecording = false;
+  String audioPath = "";
+  SpeechToText speechToText = SpeechToText();
+  bool isListening = false;
+  String recognizedText = "";
 
   @override
   void initState() {
+    audioPlayer = AudioPlayer();
     super.initState();
     _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    audioPlayer.dispose();
+
     super.dispose();
   }
 
@@ -87,13 +95,13 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _buildMessageComposer(),
+          buildMessageComposer(),
         ],
       ),
     );
   }
 
-  Widget _buildMessageComposer() {
+  Widget buildMessageComposer() {
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -117,16 +125,21 @@ class _ChatScreenState extends State<ChatScreen> {
               color: Colors.white,
             ),
             onPressed: () {
-              _sendMessage();
+              _sendMessage(recognizedText);
             },
           ),
           IconButton(
-            icon: const Icon(
-              Icons.mic,
-              color: Colors.white,
-            ),
+            icon: isListening
+                ? const Icon(
+                    Icons.stop,
+                    color: Colors.red,
+                  )
+                : const Icon(
+                    Icons.mic,
+                    color: Colors.white,
+                  ),
             onPressed: () {
-              _speakMessage();
+              isListening ? startListening() : stopListening();
             },
           ),
         ],
@@ -134,10 +147,11 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _sendMessage() {
-    if (_messageController.text.isNotEmpty) {
+  void _sendMessage(String recognizedText) {
+    String message = _messageController.text;
+    if (message.isNotEmpty) {
       _firestore.collection('messages').add({
-        'text': _messageController.text,
+        'text': message,
         'sender': 'User',
       });
 
@@ -150,14 +164,73 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<void> _speakMessage() async {
+  Future<void> speakMessage() async {
     if (_messageController.text.isNotEmpty) {
       await flutterTts.speak(_messageController.text);
     }
   }
 
-  void _deleteMessage(String messageId) {
-    _firestore.collection('messages').doc(messageId).delete();
+  void checkMicrophoneAvailability() async {
+    SpeechToText speechToText = SpeechToText();
+    bool available = await speechToText.initialize(
+      onStatus: (status) {
+        if (status == speechToText.isNotListening) {
+          setState(() {
+            isListening = false;
+          });
+        }
+      },
+      onError: (errorNotification) {
+        print("Error: $errorNotification");
+      },
+    );
+
+    if (available) {
+      setState(() {
+        print('Microphone available: $available');
+      });
+    } else {
+      print("The user has denied the use of speech recognition.");
+      // You might want to show a message or ask for permission again.
+    }
+  }
+
+  Future<void> startListening() async {
+    try {
+      bool available = await speechToText.initialize();
+      if (available) {
+        await speechToText.listen(onResult: (result) {
+          setState(() {
+            recognizedText = result.recognizedWords;
+          });
+        });
+        setState(() {
+          isListening = true;
+        });
+      } else {
+        print("The user has denied the use of speech recognition.");
+      }
+    } catch (e) {
+      print('Error starting speech recognition: $e');
+    }
+  }
+
+  void stopListening() async {
+    try {
+      await speechToText.stop();
+      setState(() {
+        isListening = false;
+        _sendMessage(recognizedText);
+        recognizedText =
+            ""; // Clear the recognized text for the next speech input.
+      });
+    } catch (e) {
+      print('Error stopping speech recognition: $e');
+    }
+  }
+
+  void _deleteMessage(String messageId) async {
+    await _firestore.collection('messages').doc(messageId).delete();
   }
 }
 

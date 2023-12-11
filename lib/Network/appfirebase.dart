@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,10 +18,9 @@ class AppFirebase {
         phoneNumber: number,
         verificationCompleted: ((phoneAuthCredential) =>
             printInfo(info: "user verified")),
-        verificationFailed: (FirebaseAuthException e) =>
-            Get.snackbar(
+        verificationFailed: (FirebaseAuthException e) => Get.snackbar(
               'Error',
-               e.message!,
+              e.message!,
               backgroundColor: Colors.transparent,
               snackPosition: SnackPosition.BOTTOM,
               margin: const EdgeInsets.all(16),
