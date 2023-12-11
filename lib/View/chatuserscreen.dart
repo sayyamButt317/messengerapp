@@ -1,8 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import 'chat.dart';
+import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);
@@ -12,63 +9,48 @@ class ContactScreen extends StatefulWidget {
 }
 
 class _ContactScreenState extends State<ContactScreen> {
+  PhoneContact? _phoneContact;
+
   @override
   Widget build(BuildContext context) {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-          title: const Text(
-            'Contacts',
-            style: TextStyle(color: Colors.white),
-          ),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          'Contacts',
+          style: TextStyle(color: Colors.white),
         ),
-        body: StreamBuilder<QuerySnapshot>(
-          stream: firestore.collection('User').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+      ),
+      body: Center(
+        child: _phoneContact != null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Selected Contact: ${_phoneContact!.fullName}'),
+                  Text('Phone Number: ${_phoneContact!.phoneNumber}'),
+                ],
+              )
+            : const Text('No contact selected'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          bool permission = await FlutterContactPicker.requestPermission();
+          if (permission) {
+            if (await FlutterContactPicker.hasPermission()) {
+              _phoneContact = await FlutterContactPicker.pickPhoneContact();
+              if (_phoneContact != null &&
+                  _phoneContact!.fullName!.isNotEmpty) {
+                // Handle the selected contact, you can add it to a list or perform other actions
+                print('Selected contact: ${_phoneContact!.fullName}');
+              } else {
+                // Handle the case where the user did not pick a contact
+              }
+              setState(() {});
             }
-
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-
-            final List<DocumentSnapshot> contacts = snapshot.data?.docs ?? [];
-
-            return ListView.builder(
-              itemCount: contacts.length,
-              itemBuilder: (context, index) {
-                final contact = contacts[index].data() as Map<String, dynamic>;
-                final String name = contact['name'] ?? '';
-                final String image = contact['image'] ?? '';
-
-                return ListTile(
-                  onTap: () {
-                    Get.to(ChatScreen(
-                      userId: contacts[index].id,
-                      userName: name,
-                      userImage: image,
-                    ));
-                  },
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(image),
-                  ),
-                  title: Text(name),
-                  subtitle:
-                  const Text('Last message'), // Add last message logic here
-                );
-              },
-            );
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Get.to(const ChatScreen(userId: "", userName: "", userImage: ""));
-            },
-            child: const Icon(Icons.messenger_rounded),
-         ),
-      );
-   }
+          }
+        },
+        child: const Icon(Icons.contacts),
+      ),
+    );
+  }
 }

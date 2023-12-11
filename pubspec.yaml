@@ -33,6 +33,7 @@ dependencies:
   audioplayers: ^5.2.1
   flutter_tts:
   record: ^5.0.1
+  fluttercontactpicker:
   
 dev_dependencies:
   flutter_test:
