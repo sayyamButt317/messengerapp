@@ -8,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../controllers/logincontroller.dart';
 
 class NumberVerification extends GetView<LoginController> {
-  const NumberVerification({Key? key}) : super(key: key);
+ const NumberVerification({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -222,8 +223,10 @@ class NumberVerification extends GetView<LoginController> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              // controller.sendOTP();
-                              Get.to(const Verification());
+controller.isLoading(true);
+                              controller.sendOTP();
+                              controller.isLoading(false);
+
                             },
                             borderRadius: BorderRadius.circular(30),
                             child: const Center(
@@ -250,27 +253,5 @@ class NumberVerification extends GetView<LoginController> {
     );
   }
 
-  Future<void> sendVerificationCode(String number) async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: controller.numberController.text,
-        verificationCompleted: ((phoneAuthCredential) =>
-            printInfo(info: "user verified")),
-        verificationFailed: (FirebaseAuthException e) => Get.snackbar(
-              'Error',
-              e.message!,
-              backgroundColor: Colors.transparent,
-              snackPosition: SnackPosition.BOTTOM,
-              margin: const EdgeInsets.all(16),
-              colorText: Colors.red,
-              borderWidth: 1,
-              borderColor: Colors.red,
-            ),
-        codeSent: (String verificationId, int? resendToken) async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString("code", verificationId);
-          Get.to(() => const Verification());
-        },
-        timeout: const Duration(seconds: 60),
-        codeAutoRetrievalTimeout: ((String verificationId) => {}));
-  }
+
 }

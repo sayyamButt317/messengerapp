@@ -29,55 +29,15 @@ class _ProfileState extends State<Profile> {
       Get.put<LoginController>(LoginController());
 
   var myuser = UserModel(uId: '', image: '', name: '').obs;
-  RxString imageUrl = RxString('');
-  File? selectedImage;
-  Future<void> getImage(ImageSource camera) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      maxWidth: 150,
-      maxHeight: 200,
-      source: camera,
-    );
-    if (image != null) {
-      setState(() {
-        selectedImage = File(image.path);
-      });
-    }
-  }
 
-  Future<String> uploadImage(File? image) async {
-    if (image == null) {
-      return '';
-    }
 
-    String imageUrl = '';
-    try {
-      String fileName = Path.basename(image.path);
-      var reference = FirebaseStorage.instance.ref().child('Users/$fileName');
-      TaskSnapshot taskSnapshot = await reference.putFile(image);
-      imageUrl = await taskSnapshot.ref.getDownloadURL();
-      debugPrint("Download URL: $imageUrl");
-    } catch (error) {
-      debugPrint("Image Upload Error: $error");
-    }
-    return imageUrl;
-  }
+
 
   Future<void> storeUserInfo() async {
     try {
-      String imageurl = await uploadImage(selectedImage);
 
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      // Update user data with image URL if it's not empty
-      if (imageurl.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('User').doc(uid).set(
-          {
-            'image': imageurl,
-          },
-          SetOptions(merge: true),
-        );
-      }
 
       // Update user data with name
       await FirebaseFirestore.instance.collection('User').doc(uid).set(
@@ -111,7 +71,6 @@ class _ProfileState extends State<Profile> {
         .snapshots()
         .listen((event) {
       myuser.value = UserModel.fromJson(event.data() ?? {});
-      imageUrl.value = myuser.value.image;
       nameController.text = myuser.value.name;
     });
   }
@@ -149,78 +108,7 @@ class _ProfileState extends State<Profile> {
                   const Center(),
                   SizedBox(
                     height: Get.height * 0.2,
-                    child: Obx(() {
-                      return Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: GestureDetector(
-                              onTap: () {
-                                getImage(ImageSource.camera);
-                              },
-                              child: selectedImage == null
-                                  ? (myuser.value.image.isNotEmpty)
-                                      ? Container(
-                                          width: 120,
-                                          height: 120,
-                                          margin:
-                                              const EdgeInsets.only(bottom: 20),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Colors.grey,
-                                              width: 5,
-                                            ),
-                                            image: DecorationImage(
-                                              fit: BoxFit.fill,
-                                              image: NetworkImage(
-                                                  myuser.value.image),
-                                            ),
-                                            shape: BoxShape.circle,
-                                            color: Colors.grey,
-                                          ),
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.camera_alt_outlined,
-                                              size: 40,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        )
-                                      : Container(
-                                          width: 120,
-                                          height: 120,
-                                          margin:
-                                              const EdgeInsets.only(bottom: 20),
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.grey,
-                                          ),
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.camera_alt_outlined,
-                                              size: 40,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        )
-                                  : Container(
-                                      width: 120,
-                                      height: 120,
-                                      margin: const EdgeInsets.only(bottom: 20),
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: FileImage(selectedImage!),
-                                          fit: BoxFit.fill,
-                                        ),
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                            ),
-                          )
-                        ],
-                      );
-                    }),
+
                   ),
                   Container(
                     height: Get.height * 0.1,

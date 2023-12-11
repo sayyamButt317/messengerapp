@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import 'message.dart';
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
     Key? key,
@@ -26,10 +28,11 @@ class _ChatScreenState extends State<ChatScreen> {
   late ScrollController _scrollController;
   FlutterTts flutterTts = FlutterTts();
   late AudioPlayer audioPlayer;
-  late Record audioRecord;
+  Record? audioRecord;
   bool isRecording = false;
   String audioPath = "";
   SpeechToText speechToText = SpeechToText();
+
   bool isListening = false;
   String recognizedText = "";
 
@@ -38,12 +41,12 @@ class _ChatScreenState extends State<ChatScreen> {
     audioPlayer = AudioPlayer();
     super.initState();
     _scrollController = ScrollController();
+    checkMicrophoneAvailability();
   }
 
   @override
   void dispose() {
     audioPlayer.dispose();
-
     super.dispose();
   }
 
@@ -71,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
 
-                var messages = snapshot.data!.docs.reversed;
+                var messages = snapshot.data!.docs;
                 List<Widget> messageWidgets = [];
                 for (var message in messages) {
                   var messageText = message['text'];
@@ -87,10 +90,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   messageWidgets.add(messageWidget);
                 }
 
-                return ListView(
+                return ListView.builder(
                   controller: _scrollController,
-                  reverse: true,
-                  children: messageWidgets,
+                  reverse: true, // Set reverse to true
+                  itemCount: messageWidgets.length,
+                  itemBuilder: (context, index) {
+                    return messageWidgets[index];
+                  },
                 );
               },
             ),
@@ -104,9 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget buildMessageComposer() {
     return Container(
       padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
-      ),
+
       child: Row(
         children: [
           Expanded(
@@ -131,15 +135,15 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             icon: isListening
                 ? const Icon(
-                    Icons.stop,
-                    color: Colors.red,
-                  )
+              Icons.stop,
+              color: Colors.red,
+            )
                 : const Icon(
-                    Icons.mic,
-                    color: Colors.white,
-                  ),
+              Icons.mic,
+              color: Colors.white,
+            ),
             onPressed: () {
-              isListening ? startListening() : stopListening();
+              isListening ? stopListening() : startListening();
             },
           ),
         ],
@@ -199,11 +203,13 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       bool available = await speechToText.initialize();
       if (available) {
-        await speechToText.listen(onResult: (result) {
-          setState(() {
-            recognizedText = result.recognizedWords;
-          });
-        });
+        await speechToText.listen(
+          onResult: (result) {
+            setState(() {
+              recognizedText = result.recognizedWords;
+            });
+          },
+        );
         setState(() {
           isListening = true;
         });
@@ -215,6 +221,8 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+
+
   void stopListening() async {
     try {
       await speechToText.stop();
@@ -222,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
         isListening = false;
         _sendMessage(recognizedText);
         recognizedText =
-            ""; // Clear the recognized text for the next speech input.
+        "";
       });
     } catch (e) {
       print('Error stopping speech recognition: $e');
@@ -234,94 +242,3 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-class MessageWidget extends StatelessWidget {
-  final String sender;
-  final String text;
-  final FlutterTts flutterTts = FlutterTts();
-  final Function onDelete;
-
-  MessageWidget({
-    required this.sender,
-    required this.text,
-    required this.onDelete,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                sender,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8.0),
-            ],
-          ),
-          const SizedBox(height: 4.0),
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-              color: sender == 'User' ? Colors.blue : Colors.grey[700],
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    text,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.volume_up,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    _speakText();
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.textsms_rounded,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    // Add logic for handling text message button tap
-                  },
-                ),
-                GestureDetector(
-                  onTap: () {
-                    onDelete();
-                  },
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    onPressed: () {
-                      // Add logic for handling delete button tap
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _speakText() async {
-    await flutterTts.speak(text);
-  }
-}

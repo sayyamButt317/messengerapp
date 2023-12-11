@@ -13,29 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 class AppFirebase {
-  Future<void> sendVerificationCode(String number) async {
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: number,
-        verificationCompleted: ((phoneAuthCredential) =>
-            printInfo(info: "user verified")),
-        verificationFailed: (FirebaseAuthException e) => Get.snackbar(
-              'Error',
-              e.message!,
-              backgroundColor: Colors.transparent,
-              snackPosition: SnackPosition.BOTTOM,
-              margin: const EdgeInsets.all(16),
-              colorText: Colors.red,
-              borderWidth: 1,
-              borderColor: Colors.red,
-            ),
-        codeSent: (String verificationId, int? resendToken) async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString("code", verificationId);
-          Get.to(() => const Verification());
-        },
-        timeout: const Duration(seconds: 60),
-        codeAutoRetrievalTimeout: ((String verificationId) => {}));
-  }
+
 
   Future<void> verifyOTP(String otp) async {
     SharedPreferences pref = await SharedPreferences.getInstance();

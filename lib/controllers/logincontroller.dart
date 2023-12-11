@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:messenger/View/user_info.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Network/appfirebase.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../Routes/routes.dart';
 
+import '../View/verification.dart';
 import '../app/app_permission.dart';
 import '../models/user_model.dart';
 
@@ -42,7 +44,31 @@ class LoginController extends GetxController {
     otpController.dispose();
   }
 
-  void sendOTP() async {
+  Future<void> sendVerificationCode(String number) async {
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: number,
+        verificationCompleted: ((phoneAuthCredential) =>
+            printInfo(info: "user verified")),
+        verificationFailed: (FirebaseAuthException e) => Get.snackbar(
+          'Error',
+          e.message!,
+          backgroundColor: Colors.transparent,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+          colorText: Colors.red,
+          borderWidth: 1,
+          borderColor: Colors.red,
+        ),
+        codeSent: (String verificationId, int? resendToken) async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString("code", verificationId);
+          Get.to(const Verification());
+        },
+        timeout: const Duration(seconds: 60),
+        codeAutoRetrievalTimeout: ((String verificationId) => {}));
+  }
+
+   sendOTP() async {
     if (numberController.text.isEmpty) {
       numberError("Field is required");
     } else if (numberController.text.length < 10) {
@@ -50,7 +76,7 @@ class LoginController extends GetxController {
     } else {
       numberError("");
       number = code + numberController.text;
-      await appFirebase.sendVerificationCode(number);
+      await sendVerificationCode(number);
     }
   }
 

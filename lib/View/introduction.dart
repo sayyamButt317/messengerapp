@@ -69,7 +69,7 @@ class IntroductionScreen extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                  onTap: () => Get.to(() => const NumberVerification()),
+                  onTap: () => Get.to(() => NumberVerification()),
                   borderRadius: BorderRadius.circular(24),
                   child: const Center(
                       child: Text("Register",

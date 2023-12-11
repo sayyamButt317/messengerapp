@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fluttercontactpicker/fluttercontactpicker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'chat.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);
@@ -9,7 +11,7 @@ class ContactScreen extends StatefulWidget {
 }
 
 class _ContactScreenState extends State<ContactScreen> {
-  final List<PhoneContact> _selectedContacts = [];
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -23,45 +25,62 @@ class _ContactScreenState extends State<ContactScreen> {
       ),
       body: Column(
         children: [
-          if (_selectedContacts.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                itemCount: _selectedContacts.length,
-                itemBuilder: (context, index) {
-                  final contact = _selectedContacts[index];
-                  return ListTile(
-                    leading: const CircleAvatar(
-                      backgroundImage: AssetImage('images/avatar.jpg'),
-                    ),
-                    title: Text(contact.fullName ?? ''),
-                    // subtitle: Text(contact.phoneNumber ?? ''),
+          Expanded(
+            child: FutureBuilder<QuerySnapshot>(
+              future: firestore.collection('User').get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
                   );
-                },
-              ),
-            )
-          else
-            const Expanded(
-              child: Center(child: Text('No contacts selected')),
+                }
+
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                var users = snapshot.data!.docs;
+
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      var user = users[index];
+                      String userId = user.id;
+                      String userName = user['name'] ?? 'Unknown User';
+
+                      return ListTile(
+                        leading: const CircleAvatar(
+                          backgroundImage: AssetImage('images/avatar.jpg'),
+                        ),
+                        title: Text(userName),
+                        onTap: () {
+                          // Navigate to the chat screen with the selected user
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                userId: userId,
+                                userName: userName,
+                                userImage: 'images/avatar.jpg', // Add user image if available
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
             ),
+          )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          bool permission = await FlutterContactPicker.requestPermission();
-          if (permission) {
-            if (await FlutterContactPicker.hasPermission()) {
-              PhoneContact? selectedContact =
-                  await FlutterContactPicker.pickPhoneContact();
-              if (selectedContact.fullName!.isNotEmpty) {
-                setState(() {
-                  _selectedContacts.add(selectedContact);
-                });
-              }
-            }
-          }
-        },
-        child: const Icon(Icons.contacts),
-      ),
+
     );
   }
 }
