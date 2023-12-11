@@ -9,7 +9,7 @@ class ContactScreen extends StatefulWidget {
 }
 
 class _ContactScreenState extends State<ContactScreen> {
-  PhoneContact? _phoneContact;
+  final List<PhoneContact> _selectedContacts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -21,31 +21,42 @@ class _ContactScreenState extends State<ContactScreen> {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      body: Center(
-        child: _phoneContact != null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Selected Contact: ${_phoneContact!.fullName}'),
-                  Text('Phone Number: ${_phoneContact!.phoneNumber}'),
-                ],
-              )
-            : const Text('No contact selected'),
+      body: Column(
+        children: [
+          if (_selectedContacts.isNotEmpty)
+            Expanded(
+              child: ListView.builder(
+                itemCount: _selectedContacts.length,
+                itemBuilder: (context, index) {
+                  final contact = _selectedContacts[index];
+                  return ListTile(
+                    leading: const CircleAvatar(
+                      backgroundImage: AssetImage('images/avatar.jpg'),
+                    ),
+                    title: Text(contact.fullName ?? ''),
+                    // subtitle: Text(contact.phoneNumber ?? ''),
+                  );
+                },
+              ),
+            )
+          else
+            const Expanded(
+              child: Center(child: Text('No contacts selected')),
+            ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           bool permission = await FlutterContactPicker.requestPermission();
           if (permission) {
             if (await FlutterContactPicker.hasPermission()) {
-              _phoneContact = await FlutterContactPicker.pickPhoneContact();
-              if (_phoneContact != null &&
-                  _phoneContact!.fullName!.isNotEmpty) {
-                // Handle the selected contact, you can add it to a list or perform other actions
-                print('Selected contact: ${_phoneContact!.fullName}');
-              } else {
-                // Handle the case where the user did not pick a contact
+              PhoneContact? selectedContact =
+                  await FlutterContactPicker.pickPhoneContact();
+              if (selectedContact.fullName!.isNotEmpty) {
+                setState(() {
+                  _selectedContacts.add(selectedContact);
+                });
               }
-              setState(() {});
             }
           }
         },

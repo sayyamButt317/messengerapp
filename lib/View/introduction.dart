@@ -5,16 +5,15 @@ import '../widgets/intro_view.dart';
 import 'number.dart';
 import 'package:get/get.dart';
 
-// ignore: must_be_immutable
 class IntroductionScreen extends StatelessWidget {
   IntroductionScreen({super.key});
 
-  PageController pageController = PageController(initialPage: 0);
+  static PageController pageController = PageController(initialPage: 0);
   List<IntroModel> introPageList = ([
     IntroModel("Number Verification", "", "images/intro3.jpg"),
     IntroModel("Find Frient Contact", "", "images/intro2.jpg"),
     IntroModel("Online Message", "", "images/intro1.jpg"),
-    IntroModel("User Profile", "", "images/phoneverfication.png"),
+    IntroModel("User Profile", "", "images/avatar.jpg"),
   ]);
 
   var currentShowIndex = 0;
