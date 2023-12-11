@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:messenger/View/verification.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../controllers/logincontroller.dart';
 
 class NumberVerification extends GetView<LoginController> {
@@ -246,5 +248,29 @@ class NumberVerification extends GetView<LoginController> {
         ),
       ),
     );
+  }
+
+  Future<void> sendVerificationCode(String number) async {
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: controller.numberController.text,
+        verificationCompleted: ((phoneAuthCredential) =>
+            printInfo(info: "user verified")),
+        verificationFailed: (FirebaseAuthException e) => Get.snackbar(
+              'Error',
+              e.message!,
+              backgroundColor: Colors.transparent,
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(16),
+              colorText: Colors.red,
+              borderWidth: 1,
+              borderColor: Colors.red,
+            ),
+        codeSent: (String verificationId, int? resendToken) async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString("code", verificationId);
+          Get.to(() => const Verification());
+        },
+        timeout: const Duration(seconds: 60),
+        codeAutoRetrievalTimeout: ((String verificationId) => {}));
   }
 }
