@@ -1,9 +1,8 @@
-import 'package:audioplayers/audioplayers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-
 import 'message.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -11,12 +10,10 @@ class ChatScreen extends StatefulWidget {
     Key? key,
     required this.userId,
     required this.userName,
-    required this.userImage,
   }) : super(key: key);
 
   final String userId;
   final String userName;
-  final userImage;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -27,26 +24,20 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late ScrollController _scrollController;
   FlutterTts flutterTts = FlutterTts();
-  late AudioPlayer audioPlayer;
-  Record? audioRecord;
-  bool isRecording = false;
-  String audioPath = "";
   SpeechToText speechToText = SpeechToText();
-
   bool isListening = false;
   String recognizedText = "";
 
   @override
   void initState() {
-    audioPlayer = AudioPlayer();
     super.initState();
+    flutterTts = FlutterTts();
+
     _scrollController = ScrollController();
-    checkMicrophoneAvailability();
   }
 
   @override
   void dispose() {
-    audioPlayer.dispose();
     super.dispose();
   }
 
@@ -110,7 +101,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget buildMessageComposer() {
     return Container(
       padding: const EdgeInsets.all(8.0),
-
       child: Row(
         children: [
           Expanded(
@@ -119,33 +109,55 @@ class _ChatScreenState extends State<ChatScreen> {
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 hintText: 'Type a message...',
-                hintStyle: TextStyle(color: Colors.white70),
+                hintStyle: TextStyle(color: Colors.black12),
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.send,
-              color: Colors.white,
+              color: Theme.of(context).primaryColor,
             ),
             onPressed: () {
               _sendMessage(recognizedText);
             },
           ),
           IconButton(
-            icon: isListening
-                ? const Icon(
-              Icons.stop,
-              color: Colors.red,
-            )
-                : const Icon(
-              Icons.mic,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              isListening ? stopListening() : startListening();
+            onPressed: () async {
+              var available = await speechToText.initialize();
+              if (!isListening) {
+                if (available) {
+                  setState(() {
+                    isListening = true;
+                  });
+                  await speechToText.listen(
+                    onResult: (result) {
+                      print("Recognized Words: ${result.recognizedWords}");
+                      setState(() {
+                        _messageController.text = result.recognizedWords;
+                      });
+                    },
+
+                  );
+                }
+              } else {
+                await speechToText.stop();
+                setState(() {
+                  isListening = false;
+                });
+                print("Speech recognition not available");
+              }
             },
-          ),
+            icon: CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor,
+              radius: 20,
+              child: Icon(
+                isListening ? Icons.mic : Icons.mic_none,
+                color: Colors.white,
+              ),
+            ),
+          )
+
         ],
       ),
     );
@@ -174,71 +186,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void checkMicrophoneAvailability() async {
-    SpeechToText speechToText = SpeechToText();
-    bool available = await speechToText.initialize(
-      onStatus: (status) {
-        if (status == speechToText.isNotListening) {
-          setState(() {
-            isListening = false;
-          });
-        }
-      },
-      onError: (errorNotification) {
-        print("Error: $errorNotification");
-      },
-    );
-
-    if (available) {
-      setState(() {
-        print('Microphone available: $available');
-      });
-    } else {
-      print("The user has denied the use of speech recognition.");
-      // You might want to show a message or ask for permission again.
-    }
-  }
-
-  Future<void> startListening() async {
-    try {
-      bool available = await speechToText.initialize();
-      if (available) {
-        await speechToText.listen(
-          onResult: (result) {
-            setState(() {
-              recognizedText = result.recognizedWords;
-            });
-          },
-        );
-        setState(() {
-          isListening = true;
-        });
-      } else {
-        print("The user has denied the use of speech recognition.");
-      }
-    } catch (e) {
-      print('Error starting speech recognition: $e');
-    }
-  }
-
-
-
-  void stopListening() async {
-    try {
-      await speechToText.stop();
-      setState(() {
-        isListening = false;
-        _sendMessage(recognizedText);
-        recognizedText =
-        "";
-      });
-    } catch (e) {
-      print('Error stopping speech recognition: $e');
-    }
-  }
-
   void _deleteMessage(String messageId) async {
     await _firestore.collection('messages').doc(messageId).delete();
   }
 }
-

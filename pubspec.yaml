@@ -27,12 +27,8 @@ dependencies:
   shared_preferences: ^2.2.2
   permission_handler:
   image_picker: ^1.0.4
-  curved_navigation_bar: ^1.0.3
-  firebase_database: ^10.3.6
   speech_to_text: ^6.4.1
-  audioplayers: ^5.2.1
   flutter_tts: ^3.8.5
-  record: ^5.0.1
 
   
 dev_dependencies:

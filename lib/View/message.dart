@@ -61,20 +61,20 @@ class MessageWidget extends StatelessWidget {
                   },
                 ),
 
-                GestureDetector(
-                  onTap: () {
-                    onDelete();
-                  },
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    onPressed: () {
-
-                    },
-                  ),
-                ),
+                // GestureDetector(
+                //   onTap: () {
+                //     onDelete();
+                //   },
+                //   child: IconButton(
+                //     icon: const Icon(
+                //       Icons.delete,
+                //       color: Colors.red,
+                //     ),
+                //     onPressed: () {
+                //
+                //     },
+                //   ),
+                // ),
               ],
             ),
           ),

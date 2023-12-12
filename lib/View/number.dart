@@ -226,6 +226,7 @@ class NumberVerification extends GetView<LoginController> {
                                 onTap: () {
                                   controller.sendOTP();
 
+
                                 },
                                 borderRadius: BorderRadius.circular(30),
                                 child: const Center(

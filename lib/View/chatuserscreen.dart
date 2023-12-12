@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:messenger/View/chat.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);
@@ -28,7 +29,12 @@ class _ContactScreenState extends State<ContactScreen> {
               future: firestore.collection('User').get(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return const Center(child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  ));
                 }
 
                 if (snapshot.hasError) {
@@ -41,17 +47,35 @@ class _ContactScreenState extends State<ContactScreen> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     var user = users[index];
-                    String userName = user['name'] ?? 'Unknown User';
+                    String? userName = user['name'] as String?;
+                    userName ??= 'Unknown User';
 
                     return ListTile(
-                      leading: const Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: AssetImage('images/avatar.jpg'),
-                          ),
-                        ],
+                      leading: const SizedBox(
+                        width: 50, // Adjust the width as needed
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: AssetImage('images/avatar.jpg'),
+                            ),
+                          ],
+                        ),
                       ),
                       title: Text(userName),
+
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChatScreen(
+                              userId: "",
+                              userName: "",
+
+                            ),
+                          ),
+                        );
+                      }
                     );
                   },
                 );
@@ -60,7 +84,6 @@ class _ContactScreenState extends State<ContactScreen> {
           )
         ],
       ),
-
     );
   }
 }
