@@ -23,7 +23,7 @@ class AppFirebase {
   Future<void> createUser(UserModel userModel) async {
     CollectionReference ref = FirebaseFirestore.instance.collection("Users");
     await FirebaseAuth.instance.currentUser?.updateDisplayName(userModel.name);
-    await FirebaseAuth.instance.currentUser?.updatePhotoURL(userModel.image);
+    // await FirebaseAuth.instance.currentUser?.updatePhotoURL(userModel.image);
     SharedPreferences.getInstance().then((value) {
       value.setString("number", userModel.number);
     });

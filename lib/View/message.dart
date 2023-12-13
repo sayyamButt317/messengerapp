@@ -10,10 +10,13 @@ class MessageWidget extends StatelessWidget {
   final Function onDelete;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+
+
   MessageWidget({
     required this.sender,
     required this.text,
     required this.onDelete,
+
     Key? key,
   }) : super(key: key);
 
@@ -61,20 +64,6 @@ class MessageWidget extends StatelessWidget {
                   },
                 ),
 
-                // GestureDetector(
-                //   onTap: () {
-                //     onDelete();
-                //   },
-                //   child: IconButton(
-                //     icon: const Icon(
-                //       Icons.delete,
-                //       color: Colors.red,
-                //     ),
-                //     onPressed: () {
-                //
-                //     },
-                //   ),
-                // ),
               ],
             ),
           ),

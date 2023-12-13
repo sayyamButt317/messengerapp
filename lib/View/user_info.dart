@@ -1,65 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:messenger/View/chatuserscreen.dart';
 import 'package:messenger/controllers/logincontroller.dart';
 
-import '../models/user_model.dart';
 
-class Profile extends StatefulWidget {
-  const Profile({
-    Key? key,
-  }) : super(key: key);
+class Profile extends GetView<LoginController>{
+  Profile({Key? key}) : super(key: key);
 
-  @override
-  State<Profile> createState() => _ProfileState();
-}
 
-class _ProfileState extends State<Profile> {
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
 
-  final LoginController getxcontroller =
-      Get.put<LoginController>(LoginController());
 
-  var myuser = UserModel(uId: '', name: '').obs;
 
-  Future<void> storeUserInfo() async {
-    try {
-      final uid = FirebaseAuth.instance.currentUser!.uid;
-
-      await FirebaseFirestore.instance.collection('User').doc(uid).set(
-        {
-          'name': nameController.text,
-        },
-        SetOptions(merge: true),
-      );
-
-      getxcontroller.isprofileloading(true);
-      Get.offAll(() => const ContactScreen());
-    } catch (error) {
-      Get.snackbar(
-        'Error',
-        "There was an error updating your profile.",
-        backgroundColor: Colors.transparent,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-        colorText: Colors.red,
-        borderWidth: 1,
-        borderColor: Colors.red,
-      );
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,14 +38,22 @@ class _ProfileState extends State<Profile> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Center(),
-                  SizedBox(
-                    height: Get.height * 0.2,
+
+                  GestureDetector(
+                    onTap: () {
+                      controller.showPicker(context);
+                    },
+                    child: const CircleAvatar(
+                      radius: 60,
+                      child:Image(image: AssetImage("images/avatar.jpg",),fit: BoxFit.fill,),
+                    ),
                   ),
+
                   Container(
                     height: Get.height * 0.1,
                   ),
                   TextFormField(
-                    controller: nameController,
+                    controller: controller.nameController,
                     cursorColor: Colors.black,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
@@ -139,19 +99,9 @@ class _ProfileState extends State<Profile> {
                       children: [
                         MaterialButton(
                           onPressed: () async {
-                            if (nameController.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please fill all required fields',
-                                  ),
-                                ),
-                              );
-                            } else {
-                              getxcontroller.isprofileloading(true);
-                              await getxcontroller.uploadUserData();
-                              getxcontroller.isprofileloading(false);
-                            }
+                              await controller.storeUserData();
+
+
                           },
                           height: 50,
                           minWidth: 300,
@@ -162,7 +112,7 @@ class _ProfileState extends State<Profile> {
                           ),
                           color: Theme.of(context).primaryColor,
                           child: Obx(() {
-                            return getxcontroller.isprofileloading.value
+                            return controller.isprofileloading.value
                                 ? const CircularProgressIndicator(
                                     strokeWidth: 3, color: Colors.white)
                                 : const Text(

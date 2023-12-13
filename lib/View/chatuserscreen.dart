@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:messenger/View/chat.dart';
 
+
 class ContactScreen extends StatefulWidget {
   const ContactScreen({Key? key}) : super(key: key);
 
@@ -11,6 +12,8 @@ class ContactScreen extends StatefulWidget {
 
 class _ContactScreenState extends State<ContactScreen> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,7 @@ class _ContactScreenState extends State<ContactScreen> {
         children: [
           Expanded(
             child: FutureBuilder<QuerySnapshot>(
-              future: firestore.collection('User').get(),
+              future: firestore.collection('Users').get(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: Row(
@@ -52,13 +55,16 @@ class _ContactScreenState extends State<ContactScreen> {
 
                     return ListTile(
                       leading: const SizedBox(
-                        width: 50, // Adjust the width as needed
+                        width: 50,
+                        height:80,
+
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CircleAvatar(
                               backgroundImage: AssetImage('images/avatar.jpg'),
                             ),
+
                           ],
                         ),
                       ),

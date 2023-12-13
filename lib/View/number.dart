@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -226,7 +225,6 @@ class NumberVerification extends GetView<LoginController> {
                                 onTap: () {
                                   controller.sendOTP();
 
-
                                 },
                                 borderRadius: BorderRadius.circular(30),
                                 child: const Center(
@@ -241,7 +239,8 @@ class NumberVerification extends GetView<LoginController> {
                                 ),
                               ),
                             ),
-                            if (controller.isLoading.value) // Assuming controller.isLoading is a boolean indicating loading state
+                            if (controller.isLoading
+                                .value) // Assuming controller.isLoading is a boolean indicating loading state
                               Positioned.fill(
                                 child: Container(
                                   color: Colors.black.withOpacity(0.5),
@@ -252,7 +251,6 @@ class NumberVerification extends GetView<LoginController> {
                               ),
                           ],
                         ),
-
                       ),
                     ),
                   ],

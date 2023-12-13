@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:messenger/View/user_info.dart';
@@ -7,9 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Network/appfirebase.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../Routes/routes.dart';
-
 import '../View/chatuserscreen.dart';
 import '../View/verification.dart';
 import '../app/app_permission.dart';
@@ -33,6 +30,7 @@ class LoginController extends GetxController {
   AppPermission appPermission = AppPermission();
   var isprofileloading = false.obs;
   RxString imageUrl = RxString('');
+  var myuser = UserModel(uId: '', name: '').obs;
 
   void setIsProfileLoading(bool isLoading) {
     isprofileloading.value = isLoading;
@@ -51,15 +49,15 @@ class LoginController extends GetxController {
         verificationCompleted: ((phoneAuthCredential) =>
             printInfo(info: "user verified")),
         verificationFailed: (FirebaseAuthException e) => Get.snackbar(
-          'Error',
-          e.message!,
-          backgroundColor: Colors.transparent,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-          colorText: Colors.red,
-          borderWidth: 1,
-          borderColor: Colors.red,
-        ),
+              'Error',
+              e.message!,
+              backgroundColor: Colors.transparent,
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(16),
+              colorText: Colors.red,
+              borderWidth: 1,
+              borderColor: Colors.red,
+            ),
         codeSent: (String verificationId, int? resendToken) async {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString("code", verificationId);
@@ -69,7 +67,7 @@ class LoginController extends GetxController {
         codeAutoRetrievalTimeout: ((String verificationId) => {}));
   }
 
-   sendOTP() async {
+  sendOTP() async {
     if (numberController.text.isEmpty) {
       numberError("Field is required");
     } else if (numberController.text.length < 10) {
@@ -90,16 +88,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       await appFirebase.verifyOTP(otpController.text);
       isLoading.value = false;
-      Get.off(const ContactScreen());
-    }
-  }
-
-  getImage(ImageSource source) async {
-    final ImagePicker picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      selectedImage.value = image.path.toString();
+      Get.off(Profile());
     }
   }
 
@@ -108,34 +97,39 @@ class LoginController extends GetxController {
     var userModel = UserModel(
       uId: auth.currentUser!.uid,
       name: "",
-
     );
     appFirebase.createUser(userModel).then((value) => isLoading(false));
     Get.offAllNamed(Routes.CHATUSER);
   }
 
-  uploadUserData() async {
+  storeUserData() async {
     if (nameController.text.isEmpty) {
       Get.snackbar("Error", "Name Field is required",
           snackPosition: SnackPosition.BOTTOM, colorText: Colors.red);
-    } else if (selectedImage.value == "") {
-      Get.snackbar(
-        "Error",
-        "Image is required",
-        snackPosition: SnackPosition.BOTTOM,
-        colorText: Colors.red,
-      );
     } else {
-      isLoading.value = true;
-
+      isprofileloading(true);
 
       var userModel = UserModel(
         uId: auth.currentUser!.uid,
         name: nameController.text,
-
       );
       await appFirebase.createUser(userModel).then((value) => isLoading(false));
       Get.offAllNamed(Routes.CHATUSER);
+    }
+  }
+
+  // String getConversationID(String id) =>  userModel.uId.hashCode <= id.hashCode
+  //     ? '${user.uid}_$'
+  //     : '${id}_${user.uid}';
+  //
+  // static Stream<Query>
+
+  getImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      selectedImage.value = image.path.toString();
     }
   }
 
@@ -162,23 +156,31 @@ class LoginController extends GetxController {
                         if (status) {
                           getImage(ImageSource.gallery);
                         } else {
-                          printError(info: "Storage Permission denied");
+                          Get.snackbar("Error", "Storage Permission denied",
+                              snackPosition: SnackPosition.BOTTOM,
+                              colorText: Colors.red);
                         }
                         break;
                       case PermissionStatus.granted:
                         getImage(ImageSource.gallery);
                         break;
                       case PermissionStatus.restricted:
-                        printError(info: "Storage Permission denied");
+                        Get.snackbar("Error", "Storage Permission denied",
+                            snackPosition: SnackPosition.BOTTOM,
+                            colorText: Colors.red);
                         break;
                       case PermissionStatus.limited:
-                        printError(info: "Storage Permission denied");
+                        Get.snackbar("Error", "Storage Permission denied",
+                            snackPosition: SnackPosition.BOTTOM,
+                            colorText: Colors.red);
                         break;
                       case PermissionStatus.permanentlyDenied:
                         await openAppSettings();
                         break;
                       case PermissionStatus.provisional:
-                        printError(info: "Provisional permission");
+                        Get.snackbar("Error", "Provisional permission",
+                            snackPosition: SnackPosition.BOTTOM,
+                            colorText: Colors.red);
                         break;
                     }
                   },
@@ -198,23 +200,31 @@ class LoginController extends GetxController {
                         if (status) {
                           getImage(ImageSource.camera);
                         } else {
-                          printError(info: "Camera Permission denied");
+                          Get.snackbar("Error", "Camera Permission denied",
+                              snackPosition: SnackPosition.BOTTOM,
+                              colorText: Colors.red);
                         }
                         break;
                       case PermissionStatus.granted:
                         getImage(ImageSource.gallery);
                         break;
                       case PermissionStatus.restricted:
-                        printError(info: "Camera Permission denied");
+                        Get.snackbar("Error", "Camera Permission denied",
+                            snackPosition: SnackPosition.BOTTOM,
+                            colorText: Colors.red);
                         break;
                       case PermissionStatus.limited:
-                        printError(info: "Camera Permission denied");
+                        Get.snackbar("Error", "Camera Permission denied",
+                            snackPosition: SnackPosition.BOTTOM,
+                            colorText: Colors.red);
                         break;
                       case PermissionStatus.permanentlyDenied:
                         await openAppSettings();
                         break;
                       case PermissionStatus.provisional:
-                        printError(info: "Provisional permission");
+                        Get.snackbar("Error", "Provisional permission",
+                            snackPosition: SnackPosition.BOTTOM,
+                            colorText: Colors.red);
                         break;
                     }
                   },
