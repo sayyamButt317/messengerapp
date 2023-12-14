@@ -11,7 +11,6 @@ class MessageWidget extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 
-
   MessageWidget({
     required this.sender,
     required this.text,
@@ -22,6 +21,8 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -37,6 +38,7 @@ class MessageWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8.0),
+
             ],
           ),
           const SizedBox(height: 4.0),
@@ -63,7 +65,6 @@ class MessageWidget extends StatelessWidget {
                     _speakText();
                   },
                 ),
-
               ],
             ),
           ),
@@ -71,9 +72,12 @@ class MessageWidget extends StatelessWidget {
       ),
     );
   }
+
+
   void _deleteMessage(String messageId) async {
     await _firestore.collection('messages').doc(messageId).delete();
   }
+
   Future<void> _speakText() async {
     await flutterTts.speak(text);
   }

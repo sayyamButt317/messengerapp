@@ -1,13 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:messenger/View/user_info.dart';
+import 'package:messenger/View/Profile.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Network/appfirebase.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../Routes/routes.dart';
-import '../View/chatuserscreen.dart';
+import '../Chat/chatuserscreen.dart';
 import '../View/verification.dart';
 import '../app/app_permission.dart';
 import '../models/user_model.dart';
@@ -31,6 +32,7 @@ class LoginController extends GetxController {
   var isprofileloading = false.obs;
   RxString imageUrl = RxString('');
   var myuser = UserModel(uId: '', name: '').obs;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   void setIsProfileLoading(bool isLoading) {
     isprofileloading.value = isLoading;
@@ -88,7 +90,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       await appFirebase.verifyOTP(otpController.text);
       isLoading.value = false;
-      Get.off(Profile());
+      Get.off(const ContactScreen());
     }
   }
 
@@ -102,19 +104,30 @@ class LoginController extends GetxController {
     Get.offAllNamed(Routes.CHATUSER);
   }
 
-  storeUserData() async {
+ storeUserData() async {
+    CollectionReference usersRef =
+        FirebaseFirestore.instance.collection("Users");
+
     if (nameController.text.isEmpty) {
       Get.snackbar("Error", "Name Field is required",
           snackPosition: SnackPosition.BOTTOM, colorText: Colors.red);
     } else {
-      isprofileloading(true);
+      String userId = auth.currentUser!.uid;
+      String userName = nameController.text;
 
-      var userModel = UserModel(
-        uId: auth.currentUser!.uid,
-        name: nameController.text,
-      );
-      await appFirebase.createUser(userModel).then((value) => isLoading(false));
-      Get.offAllNamed(Routes.CHATUSER);
+      try {
+        await usersRef.doc(userId).set({
+          'name': userName,
+        });
+
+        setIsProfileLoading(true);
+
+        Get.offAllNamed(Routes.CHATUSER);
+      } catch (e) {
+        Get.snackbar("Error", "Error storing user data: $e",
+            snackPosition: SnackPosition.BOTTOM, colorText: Colors.red);
+
+      }
     }
   }
 

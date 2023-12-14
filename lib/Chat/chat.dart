@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -6,7 +5,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'message.dart';
+import '../View/message.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -80,13 +79,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     onDelete: () {
                       _deleteMessage(message.id);
                     },
+
                   );
                   messageWidgets.add(messageWidget);
                 }
 
                 return ListView.builder(
                   controller: _scrollController,
-
+                  reverse: true,
                   itemCount: messageWidgets.length,
                   itemBuilder: (context, index) {
                     return messageWidgets[index];
@@ -139,7 +139,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         _messageController.text = result.recognizedWords;
                       });
                     },
-
                   );
                 }
               } else {
@@ -168,24 +167,18 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           )
-
         ],
       ),
     );
   }
 
-  void _sendMessage(String recognizedText) {
+  void _sendMessage(recognizedText) {
     String message = _messageController.text;
     if (message.isNotEmpty) {
-      var timestamp = Timestamp.now();
-      var senderId = widget.userId; // Assuming userId is the sender's ID
-      var receiverId = 'someReceiverId'; // Replace with the actual receiver's ID
-
       _firestore.collection('messages').add({
         'text': message,
-        'senderId': senderId,
-        'receiverId': receiverId,
-        'timestamp': timestamp,
+        'sender': widget.userId,
+        'timestamp': FieldValue.serverTimestamp(),
       });
 
       _messageController.clear();
@@ -197,7 +190,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-
   Future<void> speakMessage() async {
     if (_messageController.text.isNotEmpty) {
       await flutterTts.speak(_messageController.text);
@@ -206,36 +198,5 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _deleteMessage(String messageId) async {
     await _firestore.collection('messages').doc(messageId).delete();
-  }
-}
-class ChatMessage {
-  final String sender;
-  final String receiver;
-  final String message;
-  final Timestamp timestamp;
-
-  ChatMessage({
-    required this.sender,
-    required this.receiver,
-    required this.message,
-    required this.timestamp,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'sender': sender,
-      'receiver': receiver,
-      'message': message,
-      'timestamp': timestamp,
-    };
-  }
-
-  static ChatMessage fromMap(Map<String, dynamic> map) {
-    return ChatMessage(
-      sender: map['sender'],
-      receiver: map['receiver'],
-      message: map['message'],
-      timestamp: map['timestamp'],
-    );
   }
 }
