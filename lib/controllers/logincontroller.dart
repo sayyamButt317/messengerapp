@@ -131,11 +131,7 @@ class LoginController extends GetxController {
     }
   }
 
-  // String getConversationID(String id) =>  userModel.uId.hashCode <= id.hashCode
-  //     ? '${user.uid}_$'
-  //     : '${id}_${user.uid}';
-  //
-  // static Stream<Query>
+
 
   getImage(ImageSource source) async {
     final ImagePicker picker = ImagePicker();
