@@ -224,7 +224,6 @@ class NumberVerification extends GetView<LoginController> {
                               child: InkWell(
                                 onTap: () {
                                   controller.sendOTP();
-
                                 },
                                 borderRadius: BorderRadius.circular(30),
                                 child: const Center(
@@ -240,7 +239,7 @@ class NumberVerification extends GetView<LoginController> {
                               ),
                             ),
                             if (controller.isLoading
-                                .value) // Assuming controller.isLoading is a boolean indicating loading state
+                                .value)
                               Positioned.fill(
                                 child: Container(
                                   color: Colors.black.withOpacity(0.5),
