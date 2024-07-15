@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:messenger/Routes/routes.dart';
 import 'package:messenger/controllers/logincontroller.dart';
-
 import 'introduction.dart';
 
 class SplashScreen extends StatefulWidget {

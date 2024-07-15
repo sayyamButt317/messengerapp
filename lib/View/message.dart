@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -74,7 +73,7 @@ class MessageWidget extends StatelessWidget {
   }
 
 
-  void _deleteMessage(String messageId) async {
+  void deleteMessage(String messageId) async {
     await _firestore.collection('messages').doc(messageId).delete();
   }
 

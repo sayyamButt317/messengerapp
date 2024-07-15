@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:loading_overlay/loading_overlay.dart';
-import 'package:messenger/Chat/chatuserscreen.dart';
-import 'package:messenger/View/Profile.dart';
 import 'package:pin_input_text_field/pin_input_text_field.dart';
-
 import '../controllers/logincontroller.dart';
 
 class Verification extends GetView<LoginController> {
@@ -35,10 +32,10 @@ class Verification extends GetView<LoginController> {
                   child: Container(
                     height: AppBar().preferredSize.height,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
+                      color: Theme.of(context).colorScheme.surface,
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.background,
+                          color: Theme.of(context).colorScheme.surface,
                           blurRadius: 10,
                           offset: const Offset(4, 4),
                         ),
@@ -150,7 +147,6 @@ class Verification extends GetView<LoginController> {
                                 child: InkWell(
                                     onTap: () {
                                       controller.verifyOTP();
-
                                     },
                                     borderRadius: BorderRadius.circular(30),
                                     child: const Center(

@@ -112,7 +112,7 @@ class NumberVerification extends GetView<LoginController> {
                             height: 48,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(30),
-                              color: Theme.of(context).colorScheme.background,
+                              color: Theme.of(context).colorScheme.surface,
                               boxShadow: [
                                 BoxShadow(
                                   color: Theme.of(context)

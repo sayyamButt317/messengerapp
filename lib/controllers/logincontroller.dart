@@ -18,17 +18,21 @@ class LoginController extends GetxController {
   TextEditingController otpController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
+
   String code = "+92";
   RxString numberError = RxString("");
   RxString nameError = RxString("");
   RxString pinError = RxString("");
   RxString selectedimage = "".obs;
+
   FirebaseAuth auth = FirebaseAuth.instance;
   AppFirebase appFirebase = AppFirebase();
   late String number;
+
   RxBool isLoading = RxBool(false);
   RxString selectedImage = "".obs;
   AppPermission appPermission = AppPermission();
+  
   var isprofileloading = false.obs;
   RxString imageUrl = RxString('');
   var myuser = UserModel(uId: '', name: '').obs;
@@ -242,7 +246,7 @@ class LoginController extends GetxController {
             ),
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)));
   }
 }
